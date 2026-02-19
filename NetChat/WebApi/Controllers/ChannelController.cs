@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.Channels;
+using Domain;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace WebApi.Controllers
@@ -7,36 +10,30 @@ namespace WebApi.Controllers
     [ApiController]
     public class ChannelController : ControllerBase
     {
-        // GET: api/<ChannelController>
+        private IMediator _mediator;
+
+        public ChannelController(IMediator mediator)
+        {
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        }
+
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<List<Channel>>> List()
         {
-            return new string[] { "value1", "value2" };
+            return await _mediator.Send(new List.Query() );
         }
 
-        // GET api/<ChannelController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{id}")] 
+        public async Task<ActionResult<Channel>> Details(Guid id)
         {
-            return "value";
+            return await _mediator.Send(new Details.Query { Id = id });
         }
 
-        // POST api/<ChannelController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<Unit> Create(Create.Command command)
         {
+            return await _mediator.Send(command);
         }
 
-        // PUT api/<ChannelController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<ChannelController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
